@@ -1,0 +1,15 @@
+{
+  "name": "zibar",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "colors": "~1.1.2",
+    "human-format": "~0.6.0"
+  }
+}
