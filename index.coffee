@@ -14,6 +14,8 @@ zibar = (data, options) ->
     ticks: options?.yAxis?.ticks?
     decimals: if options?.yAxis?.decimals? then options?.yAxis?.decimals else 1
     display: options?.yAxis?.display isnt false
+    transform: options?.transform || (x) -> x
+    inverse: options?.inverse || (x) -> x
   x =
     color: options?.xAxis?.color||'cyan'
     style: options?.xAxis?.style||'reset'
@@ -21,8 +23,14 @@ zibar = (data, options) ->
     ticks: false
     trim: true
     display: options?.xAxis?.display isnt false
+    transform: (x) -> x
+    inverse: (x) -> x
   label = (axis, val, length=9, right=false) ->
-    val = human(val, { decimals: axis.decimals, scale: scale}) + " "
+    val = axis.inverse(val)
+    if val is NaN
+      val = ''
+    else
+      val = human(val, { decimals: axis.decimals, scale: scale}) + " "
     if axis.decimals and val.indexOf(".") == -1
       val = val.replace /([0-9]) /, '$1.0 '
     if axis.ticks
@@ -40,8 +48,8 @@ zibar = (data, options) ->
   max = Math.max.apply null, data
   low = if options?.low? then options.low else min
   high = if options?.high? then options.high else max
-  min = if options?.min? then options.min else Math.min low, min
-  max = if options?.max? then options.max else Math.max high, max
+  min = y.transform(if options?.min? then options.min else Math.min low, min)
+  max = y.transform(if options?.max? then options.max else Math.max high, max)
   span = max-min
   step = span/height
   for r in [height..1]
@@ -50,6 +58,7 @@ zibar = (data, options) ->
     row = []
     for value in data
       char = ' '
+      value = y.transform(value)
       if value >= floor
         fraction = 9*(value-floor)/step
         fraction = if r is 1 and value != 0 and fraction < 1 then 1 else fraction
@@ -82,9 +91,13 @@ zibar = (data, options) ->
 exports:
   zibar: zibar
 
-if process.argv[1].indexOf('zibar')
+if process.argv[1].indexOf('zibar') != -1
   data = [2, 4, 6, 6, 7, 8, 3, 5, 3, 0, 1]
   process.stdout.write zibar data,
+    min: 1
+    max: 100
+    #transform: (x) -> Math.log(x) / Math.log(10)
+    #inverse: (x) -> Math.pow(10, x)
     xAxis:
       origin: 3
       offset: 2
