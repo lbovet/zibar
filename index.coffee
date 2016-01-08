@@ -94,8 +94,6 @@ exports:
 if process.argv[1].indexOf('zibar') != -1
   data = [2, 4, 6, 6, 7, 8, 3, 5, 3, 0, 1]
   process.stdout.write zibar data,
-    min: 1
-    max: 100
     #transform: (x) -> Math.log(x) / Math.log(10)
     #inverse: (x) -> Math.pow(10, x)
     xAxis:
