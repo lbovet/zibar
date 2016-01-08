@@ -10,14 +10,17 @@ scale = new human.Scale
 zibar = (data, options) ->
   full = if options?.badBlock then '▇' else '█'
   bg = null
+  style = (s, c) ->
+    for i in c.split(",")
+      s = s[i]
+    return s
   if options?.background
     bgColor = options?.background.split ''
     bgColor = bgColor.splice(0, 1).join('').toUpperCase() + bgColor.join('')
     if options?.fixFull
-      bg = '▇'[options?.background]
+      bg = style('▇', options.background)
   y =
     color: options?.yAxis?.color||'cyan'
-    style: options?.yAxis?.style||'reset'
     ticks: options?.yAxis?.ticks?
     decimals: if options?.yAxis?.decimals? then options?.yAxis?.decimals else 1
     display: options?.yAxis?.display isnt false
@@ -25,7 +28,6 @@ zibar = (data, options) ->
     inverse: options?.inverse || (x) -> x
   x =
     color: options?.xAxis?.color||'cyan'
-    style: options?.xAxis?.style||'reset'
     decimals: if options?.xAxis?.decimals? then options?.xAxis?.decimals else 0
     ticks: false
     trim: true
@@ -47,7 +49,7 @@ zibar = (data, options) ->
     numPads = length - val.length
     pad = new Array(numPads + 1).join(' ')
     val = if right then val+pad else pad+val
-    val = val[axis.color][axis.style]
+    val = style(val, axis.color)
   result = []
   height = options?.height || 10
   color = options?.color || 'yellow'
@@ -63,8 +65,10 @@ zibar = (data, options) ->
     floor = min + step*(r-1)
     ceil = floor + step
     row = []
+    pos = 0
     for value in data
       char = if bg then bg else ' '
+      char = style("|",options.vlines[pos]) if options?.vlines?[pos]
       value = y.transform(value)
       if value >= floor
         fraction = 9*(value-floor)/step
@@ -72,13 +76,14 @@ zibar = (data, options) ->
         fraction = if fraction >= 8 and options?.badBlock then 7 else fraction
         fraction = Math.floor(fraction)
         char = if value <= ceil then fractions[fraction] else full
-      char = char[color] if bg
+      special = options?.colors?[pos++] || color
+      char = style(char, color) if bg and not special
+      char = style(char, special) if options?.colors
       row.push char
     row.push bg if bg
     row.push ' ' if bg
     line = (row.join '')
-    line = line[color] if not bg
-    line = line[options.style] if options?.style and not bg
+    line = style(line,color) if not bg
     line = line['bg'+bgColor] if bgColor
     line = (if y.display then label(y, floor) else "") + line
     result.push line
@@ -99,7 +104,15 @@ zibar = (data, options) ->
   for i in [start..end]
     xlabels.push label(x, factor*(i*interval+offset)+origin, interval, true)
   pad = if y.display then "         " else ''
-  result = (if y.display then label(y, max) + '\n' else '') +
+  marks = [' ']
+  if options?.marks
+    for mark in options.marks
+      symbol = ' '
+      if mark
+        symbol = if mark.symbol then mark.symbol else mark
+        symbol = if mark.color then style(symbol, mark.color) else symbol
+      marks.push symbol
+  result = (if y.display then label(y, max) + marks.join('') + '\n' else '') +
     result.join('\n') + '\n' +
     if x.display then pad + xlabels.join('') + '\n' else ''
 
@@ -109,4 +122,10 @@ exports:
 if process.argv[1].indexOf('zibar') != -1
   data = [2, 4, 6, 6, 7, 8, 3, 5, 3, 0, 1]
   process.stdout.write zibar data,
-    
+    marks: [ 0, 0 , 0, 0, { symbol: '▼', color: 'red'} ]
+    color: 'white'
+    height: 2
+    colors: { 2:  'green,bold' }
+    vlines: [ 0, 0, 'green' ]
+    yAxis:
+      decimals: 0
