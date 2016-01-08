@@ -8,6 +8,13 @@ scale = new human.Scale
   G: 1000000000,
   T: 1000000000000
 zibar = (data, options) ->
+  full = if options?.badBlock then '▇' else '█'
+  bg = null
+  if options?.background
+    bgColor = options?.background.split ''
+    bgColor = bgColor.splice(0, 1).join('').toUpperCase() + bgColor.join('')
+    if options?.fixFull
+      bg = '▇'[options?.background]
   y =
     color: options?.yAxis?.color||'cyan'
     style: options?.yAxis?.style||'reset'
@@ -57,16 +64,23 @@ zibar = (data, options) ->
     ceil = floor + step
     row = []
     for value in data
-      char = ' '
+      char = if bg then bg else ' '
       value = y.transform(value)
       if value >= floor
         fraction = 9*(value-floor)/step
         fraction = if r is 1 and value != 0 and fraction < 1 then 1 else fraction
+        fraction = if fraction >= 8 and options?.badBlock then 7 else fraction
         fraction = Math.floor(fraction)
-        char = if value <= ceil then fractions[fraction] else '█'
+        char = if value <= ceil then fractions[fraction] else full
+      char = char[color] if bg
       row.push char
-      line = (row.join '')[color][options?.style||'reset']
-      line = (if y.display then label(y, floor) else "") + line
+    row.push bg if bg
+    row.push ' ' if bg
+    line = (row.join '')
+    line = line[color] if not bg
+    line = line[options.style] if options?.style and not bg
+    line = line['bg'+bgColor] if bgColor
+    line = (if y.display then label(y, floor) else "") + line
     result.push line
   xlabels = []
   interval = options?.xAxis?.interval || 5
@@ -84,9 +98,10 @@ zibar = (data, options) ->
       end = Math.max(end-1,0)
   for i in [start..end]
     xlabels.push label(x, factor*(i*interval+offset)+origin, interval, true)
+  pad = if y.display then "         " else ''
   result = (if y.display then label(y, max) + '\n' else '') +
     result.join('\n') + '\n' +
-    if x.display then "         " + xlabels.join('') + '\n' else ''
+    if x.display then pad + xlabels.join('') + '\n' else ''
 
 exports:
   zibar: zibar
@@ -94,8 +109,4 @@ exports:
 if process.argv[1].indexOf('zibar') != -1
   data = [2, 4, 6, 6, 7, 8, 3, 5, 3, 0, 1]
   process.stdout.write zibar data,
-    #transform: (x) -> Math.log(x) / Math.log(10)
-    #inverse: (x) -> Math.pow(10, x)
-    xAxis:
-      origin: 3
-      offset: 2
+    
