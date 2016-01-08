@@ -1,4 +1,5 @@
 require 'colors'
+strip = require 'strip-ansi'
 human = require 'human-format'
 fractions = ' ▁▂▃▄▅▅▆▇█'
 scale = new human.Scale
@@ -34,21 +35,29 @@ zibar = (data, options) ->
     display: options?.xAxis?.display isnt false
     transform: (x) -> x
     inverse: (x) -> x
-  label = (axis, val, length=9, right=false) ->
+    format: options?.xAxis?.format || (x) -> x
+  label = (axis, val, length=9, right=false, format) ->
+    length = Math.round length
     val = axis.inverse(val)
     if val is NaN
       val = ''
     else
-      val = human(val, { decimals: axis.decimals, scale: scale}) + " "
-    if axis.decimals and val.indexOf(".") == -1
-      val = val.replace /([0-9]) /, '$1.0 '
+      if format
+        val = format(val)+" "
+      else
+        val = human(val, { decimals: axis.decimals, scale: scale})+" "
+      if axis.decimals and val.indexOf(".") == -1
+        val = val.replace /([0-9]) /, '$1.0 '
     if axis.ticks
       val = val.replace ' ', '_'
     if axis.trim
       val = val.trim()
-    numPads = length - val.length
-    pad = new Array(numPads + 1).join(' ')
-    val = if right then val+pad else pad+val
+    numPads = length - strip(val).length
+    if numPads > 0
+      pad = new Array(numPads + 1).join(' ')
+      val = if right then val+pad else pad+val
+    else
+      val = val.substring 0, length
     val = style(val, axis.color)
   result = []
   height = options?.height || 10
@@ -96,13 +105,15 @@ zibar = (data, options) ->
   origin = options?.xAxis?.origin || 0
   offset = options?.xAxis?.offset || 0
   if offset
+    sign = Math.sign offset
     offset = offset % interval
     offset = interval + offset if offset < 0
     if offset
-      xlabels.push ' ' for i in [1..offset].join('')
+      n = offset
+      xlabels.push (' ' for i in [1..n]).join('')
       end = Math.max(end-1,0)
   for i in [start..end]
-    xlabels.push label(x, factor*(i*interval+offset)+origin, interval, true)
+    xlabels.push label(x, factor*(i*interval+offset)+origin, interval, true, x.format)
   pad = if y.display then "         " else ''
   marks = [' ']
   if options?.marks
@@ -116,16 +127,24 @@ zibar = (data, options) ->
     result.join('\n') + '\n' +
     if x.display then pad + xlabels.join('') + '\n' else ''
 
-exports:
-  zibar: zibar
+module.exports = zibar
 
 if process.argv[1].indexOf('zibar') != -1
-  data = [2, 4, 6, 6, 7, 8, 3, 5, 3, 0, 1]
-  process.stdout.write zibar data,
-    marks: [ 0, 0 , 0, 0, { symbol: '▼', color: 'red'} ]
-    color: 'white'
-    height: 2
-    colors: { 2:  'green,bold' }
-    vlines: [ 0, 0, 'green' ]
-    yAxis:
-      decimals: 0
+  data = [2, 4, 6, 6, 7, 8, 3, 5, 3, 0, 1, 6, 7, 4, 2, 3, 4, 4, 5, 3, 5, 3, 0, 1, 6, 7, 4, 2, 3, 4, 4, 5]
+  now = Math.round(Date.now()/1000)
+  for i in [0..20]
+    process.stdout.write zibar data,
+      marks: [ 0, 0 , 0, 0, { symbol: '▼', color: 'red'} ]
+      color: 'white'
+      height: 1
+      colors: { 2:  'green,bold' }
+      vlines: [ 0, 0, 'green' ]
+      yAxis:
+        decimals: 1
+      xAxis:
+        interval: 13
+        origin: i+now
+        offset: -i-6
+        format: (x) ->
+          d = new Date(x*1000).toISOString()
+          d.substr(11, 6).grey+d.substr(17, 2).cyan
