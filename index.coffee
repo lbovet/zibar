@@ -95,13 +95,13 @@ zibar = (data, options) ->
     line = (row.join '')
     line = style(line,color) if not bg
     line = line['bg'+bgColor] if bgColor
-    line = (if y.display then label(y, floor) else "") + line
+    line = (if y.display then label(y, floor || 0) else "") + line
     result.push line
   xlabels = []
   interval = options?.xAxis?.interval || 5
   factor = options?.xAxis?.factor || 1
   start = 0
-  end = Math.floor(data.length/interval)
+  end = Math.floor(data.length/interval) || 0
   shift = 0
   origin = options?.xAxis?.origin || 0
   offset = options?.xAxis?.offset || 0
@@ -124,14 +124,14 @@ zibar = (data, options) ->
         symbol = if mark.symbol then mark.symbol else mark
         symbol = if mark.color then style(symbol, mark.color) else symbol
       marks.push symbol
-  result = (if y.display then label(y, max) + marks.join('') + '\n' else '') +
+  result = (if y.display then label(y, if max < -Infinity then max else 0) + marks.join('') + '\n' else '') +
     result.join('\n') + '\n' +
     if x.display then pad + xlabels.join('') + '\n' else ''
 
 module.exports = zibar
 
 if process.argv[1].indexOf('zibar') != -1
-  data = [2, 4, 6, 6, 7, 8, 3, 5, 3, 0, 1, 6, 7, 4, 2, 3, 4, 4, 5, 3, 5, 3, 0, 1, 6, 7, 4, 2, 3, 4, 4, 5]
+  data = []
   now = Math.round(Date.now()/1000)
   for i in [0..20]
     process.stdout.write zibar data,
