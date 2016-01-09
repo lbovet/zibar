@@ -12,6 +12,8 @@ zibar = (data, options) ->
   full = if options?.badBlock then '▇' else '█'
   bg = null
   style = (s, c) ->
+    if not s
+      return ' '
     for i in c.split(",")
       s = s[i]
     return s
@@ -116,7 +118,7 @@ zibar = (data, options) ->
   for i in [start..end]
     xlabels.push label(x, factor*(i*interval+offset)+origin, interval, true, x.format)
   pad = if y.display then "         " else ''
-  marks = [' ']
+  marks = []
   if options?.marks
     for mark in options.marks
       symbol = ' '
@@ -124,20 +126,23 @@ zibar = (data, options) ->
         symbol = if mark.symbol then mark.symbol else mark
         symbol = if mark.color then style(symbol, mark.color) else symbol
       marks.push symbol
-  result = (if y.display then label(y, if max < -Infinity then max else 0) + marks.join('') + '\n' else '') +
+  hasHead = y.display or options?.marks
+  axisHead = if y.display then label(y, if max > -Infinity then max else 0) else ''
+  markLine = if options?.marks then marks.join('') else ''
+  result = (if hasHead then axisHead + markLine + '\n' else '') +
     result.join('\n') + '\n' +
     if x.display then pad + xlabels.join('') + '\n' else ''
 
 module.exports = zibar
 
 if process.argv[1].indexOf('zibar') != -1
-  data = []
+  data = [1, 2, 3, 4, 5]
   now = Math.round(Date.now()/1000)
   for i in [0..20]
     process.stdout.write zibar data,
       marks: [ 0, 0 , 0, 0, { symbol: '▼', color: 'red'} ]
       color: 'white'
-      height: 1
+      height: 2
       colors: { 2:  'green,bold' }
       vlines: [ 0, 0, 'green' ]
       yAxis:
