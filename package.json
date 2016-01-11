@@ -1,10 +1,11 @@
 {
   "name": "zibar",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "",
-  "main": "index.coffee",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "coffee -c index.coffee"
   },
   "author": "",
   "license": "BSD-2-Clause",
