@@ -1,4 +1,5 @@
 # Zibar
+Pretty graphs for the terminal
 
 ![screenshot from 2016-01-12 21 48 11](https://cloud.githubusercontent.com/assets/692124/12276730/9e8ace9a-b977-11e5-8628-5b89d6486b00.png)
 
