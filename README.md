@@ -120,22 +120,23 @@ npm install zibar --save
 
 ```javascript
 var zibar = require('zibar');
-zibar(data, config);
+var graph = zibar(data, config);  // returns the graph as a string
 ```
-
+Example
 ```javascript
-zibar([30, 12, 9.8, 31, 14, 31.5, 4, 6, 22, 33, 4, 22],
-      {
-        "height": 1,
-        "min": 0,
-        "color": "yellow,bold",
-        "yAxis": {
-          "display": false
-        },
-        "xAxis": {
-          "display": false
-        }
-      });
+var graph = zibar([30, 12, 9.8, 31, 14, 31.5, 4, 6, 22, 33, 4, 22],
+                  {
+                    "height": 1,
+                    "min": 0,
+                    "color": "yellow,bold",
+                    "yAxis": {
+                      "display": false
+                    },
+                    "xAxis": {
+                      "display": false
+                    }
+                  });
+process.stdout.write(graph);
 ```
 
 # Formatting
