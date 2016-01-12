@@ -134,23 +134,3 @@ zibar = (data, options) ->
     if x.display then pad + xlabels.join('') + '\n' else ''
 
 module.exports = zibar
-
-if process.argv[1].indexOf('zibar') != -1
-  data = [1, 2, 3, 4, 5]
-  now = Math.round(Date.now()/1000)
-  for i in [0..20]
-    process.stdout.write zibar data,
-      marks: [ 0, 0 , 0, 0, { symbol: '▼', color: 'red'} ]
-      color: 'white'
-      height: 2
-      colors: { 2:  'green,bold' }
-      vlines: [ 0, 0, 'green' ]
-      yAxis:
-        decimals: 1
-      xAxis:
-        interval: 13
-        origin: i+now
-        offset: -i-6
-        format: (x) ->
-          d = new Date(x*1000).toISOString()
-          d.substr(11, 6).grey+d.substr(17, 2).cyan
