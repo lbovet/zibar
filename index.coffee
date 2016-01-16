@@ -1,7 +1,6 @@
 require 'colors'
 strip = require 'strip-ansi'
 human = require 'human-format'
-fractions = ' ▁▂▃▄▅▅▆▇█'
 scale = new human.Scale
   '': 1,
   k: 1000,
@@ -9,7 +8,8 @@ scale = new human.Scale
   G: 1000000000,
   T: 1000000000000
 zibar = (data, options) ->
-  full = if options?.badBlock then '▇' else '█'
+  fractions = options.chars or ' ▁▂▃▄▅▅▆▇█'
+  full = if options?.badBlock then fractions[8] else fractions[9]
   bg = null
   style = (s, c) ->
     if not s
@@ -21,7 +21,7 @@ zibar = (data, options) ->
     bgColor = options?.background.split ''
     bgColor = bgColor.splice(0, 1).join('').toUpperCase() + bgColor.join('')
     if options?.fixFull
-      bg = style('▇', options.background)
+      bg = style(fractions[8], options.background)
   y =
     color: options?.yAxis?.color||'cyan'
     ticks: options?.yAxis?.ticks?
