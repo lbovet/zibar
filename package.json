@@ -1,8 +1,8 @@
 {
   "name": "zibar",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Pretty graphs for the terminal",
-  "author": "",
+  "author": "Laurent Bovet <laurent.bovet@windmaster.ch>",
   "keywords": [
     "terminal",
     "console",

@@ -108,7 +108,6 @@ zibar = (data, options) ->
   origin = options?.xAxis?.origin || 0
   offset = options?.xAxis?.offset || 0
   if offset
-    sign = Math.sign offset
     offset = offset % interval
     offset = interval + offset if offset < 0
     if offset
