@@ -73,6 +73,7 @@ Or minimal sparkline style
   "max": 10,                   // maximum value, clips values above
   "low": 3,                    // soft minimum, values below are also shown
   "high": 6.                   // soft maximum, values above are also shown
+  "chars": " ⡀⡀⡄⡄⡆⡆⡇⡇⡇",     // characters used for the bars, defaults to unicode block elements
   "marks": [ 0,                // markers chars above the graph
             "?",               // can be an array or integer-indexed object
             null,
